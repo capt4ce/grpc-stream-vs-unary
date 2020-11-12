@@ -1,0 +1,27 @@
+syntax="proto3";
+
+package proto;
+
+service MainService {
+    rpc SendUnaryRequest (UnaryRequest) returns (UnaryReply) {};
+}
+  
+message UnaryRequest {
+    int64 req = 1;
+}
+
+message UnaryReply {
+    int64 res = 1;
+}
+
+service StreamService{
+    rpc SendStreamRequest(stream StreamRequest) returns (stream StreamReply){};
+}
+
+message StreamRequest{
+    int64 req= 1;
+}
+
+message StreamReply{
+    int64 res= 1;
+}

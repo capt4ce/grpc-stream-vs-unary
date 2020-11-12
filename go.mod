@@ -1,0 +1,11 @@
+module github.com/capt4ce/grpc-stream-vs-unary
+
+go 1.15
+
+require (
+	github.com/sirupsen/logrus v1.7.0
+	google.golang.org/grpc v1.33.2
+	google.golang.org/protobuf v1.25.0
+)
+
+replace github.com/capt4ce/grpc-stream-vs-unary => /Users/ali/work/bcz/grpc-stream-vs-unary
