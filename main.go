@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/capt4ce/grpc-stream-vs-unary/communication"
+	"github.com/capt4ce/grpc-stream-vs-unary/monitoring"
 )
 
 func main() {
@@ -11,6 +12,8 @@ func main() {
 	if len(os.Args) >= 2 {
 		serverType = os.Args[1]
 	}
+
+	monitoring.StartMonitoring(true)
 
 	if serverType == "stream" {
 		serverType = "stream"

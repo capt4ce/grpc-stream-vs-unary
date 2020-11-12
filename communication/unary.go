@@ -7,8 +7,8 @@ import (
 	"net"
 	"time"
 
+	"github.com/capt4ce/grpc-stream-vs-unary/monitoring"
 	pb "github.com/capt4ce/grpc-stream-vs-unary/proto"
-	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 )
 
@@ -43,7 +43,6 @@ func CreateUnaryClient(address string) CommunicationInterface {
 }
 
 func (u Unary) SendRequest() {
-	// fmt.Print("Greeting")
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(u.Address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
@@ -63,6 +62,10 @@ func (u Unary) SendRequest() {
 func (u Unary) SendResponseResponse() {}
 
 func (us *UnaryServer) SendUnaryRequest(ctx context.Context, in *pb.UnaryRequest) (*pb.UnaryReply, error) {
-	logrus.Println("request", in.GetReq())
+	monitoring.IncrementCounter()
+	defer monitoring.DecrementCounter()
+
+	// logrus.Println("request", in.GetReq())
+
 	return &pb.UnaryReply{Res: 123}, nil
 }

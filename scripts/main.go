@@ -17,7 +17,7 @@ func main() {
 		serverType = os.Args[1]
 	}
 
-	monitoring.StartMonitoring()
+	monitoring.StartMonitoring(true)
 
 	if serverType == "stream" {
 		serverType = "stream"
@@ -32,7 +32,7 @@ func main() {
 		for {
 			select {
 			case <-ticker.C:
-				for i := 0; i < 100; i++ {
+				for i := 0; i < 1000; i++ {
 					go func() {
 						monitoring.IncrementCounter()
 						defer monitoring.DecrementCounter()

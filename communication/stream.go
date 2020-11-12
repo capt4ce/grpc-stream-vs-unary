@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"net"
 
+	"github.com/capt4ce/grpc-stream-vs-unary/monitoring"
 	pb "github.com/capt4ce/grpc-stream-vs-unary/proto"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -97,11 +98,15 @@ func (ss *StreamServer) SendStreamRequest(stream pb.StreamService_SendStreamRequ
 		if err != nil {
 			return status.Errorf(codes.Unknown, "cannot receive stream request: %v", err)
 		}
-		logrus.Println("request ", req.GetReq())
-		err = stream.Send(&pb.StreamReply{Res: req.GetReq()})
-		if err != nil {
-			logrus.Println(err)
-		}
+		monitoring.IncrementCounter()
+		// logrus.Println("request ", req.GetReq())
+		go func() {
+			defer monitoring.DecrementCounter()
+			err = stream.Send(&pb.StreamReply{Res: req.GetReq()})
+			if err != nil {
+				logrus.Println(err)
+			}
+		}()
 	}
 
 	return nil
