@@ -26,7 +26,7 @@ func StartMonitoring(showZeroRequest bool) {
 			case <-ticker.C:
 				count := monitoringInstance.count
 				goRoutineNum := runtime.NumGoroutine()
-				if !showZeroRequest || count != 0 {
+				if showZeroRequest || count != 0 {
 					logrus.Println("Ongoing requests: ", count)
 					logrus.Println("Number of go routines: ", goRoutineNum)
 					logrus.Println()

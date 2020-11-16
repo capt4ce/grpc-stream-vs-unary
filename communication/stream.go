@@ -7,6 +7,7 @@ import (
 	"log"
 	"math/rand"
 	"net"
+	"time"
 
 	"github.com/capt4ce/grpc-stream-vs-unary/monitoring"
 	pb "github.com/capt4ce/grpc-stream-vs-unary/proto"
@@ -102,6 +103,31 @@ func (ss *StreamServer) SendStreamRequest(stream pb.StreamService_SendStreamRequ
 		// logrus.Println("request ", req.GetReq())
 		go func() {
 			defer monitoring.DecrementCounter()
+			err = stream.Send(&pb.StreamReply{Res: req.GetReq()})
+			if err != nil {
+				logrus.Println(err)
+			}
+		}()
+	}
+
+	return nil
+}
+
+func (ss *StreamServer) SendMessageTrial(stream pb.StreamService_SendMessageTrialServer) error {
+	for {
+		req, err := stream.Recv()
+		if err == io.EOF {
+			logrus.Println("no more data")
+			break
+		}
+		if err != nil {
+			return status.Errorf(codes.Unknown, "cannot receive stream request: %v", err)
+		}
+		monitoring.IncrementCounter()
+		// logrus.Println("request ", req.GetReq())
+		go func() {
+			defer monitoring.DecrementCounter()
+			time.Sleep(30 * time.Millisecond)
 			err = stream.Send(&pb.StreamReply{Res: req.GetReq()})
 			if err != nil {
 				logrus.Println(err)

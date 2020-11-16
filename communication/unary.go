@@ -14,6 +14,7 @@ import (
 
 type Unary struct {
 	Address string
+	Client  pb.MainServiceClient
 }
 type UnaryServer struct {
 	pb.UnimplementedMainServiceServer
@@ -37,24 +38,24 @@ func StartUnaryServerInstance(port string) {
 }
 
 func CreateUnaryClient(address string) CommunicationInterface {
+	// Set up a connection to the server.
+	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	client := pb.NewMainServiceClient(conn)
+
 	return Unary{
 		Address: address,
+		Client:  client,
 	}
 }
 
 func (u Unary) SendRequest() {
-	// Set up a connection to the server.
-	conn, err := grpc.Dial(u.Address, grpc.WithInsecure(), grpc.WithBlock())
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
-	defer conn.Close()
-	c := pb.NewMainServiceClient(conn)
-
 	// Contact the server and print out its response.
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	_, err = c.SendUnaryRequest(ctx, &pb.UnaryRequest{Req: 1})
+	_, err := u.Client.SendUnaryRequest(ctx, &pb.UnaryRequest{Req: 1})
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}
@@ -67,5 +68,6 @@ func (us *UnaryServer) SendUnaryRequest(ctx context.Context, in *pb.UnaryRequest
 
 	// logrus.Println("request", in.GetReq())
 
+	time.Sleep(30 * time.Millisecond)
 	return &pb.UnaryReply{Res: 123}, nil
 }
