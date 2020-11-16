@@ -1,49 +1,33 @@
 package monitoring
 
 import (
-	"runtime"
-	"sync"
+	"net/http"
 
-	"time"
-
-	"github.com/sirupsen/logrus"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
-
-type Monitor struct {
-	count int
-	sync.Mutex
-}
 
 var (
-	monitoringInstance Monitor
+	requestsCounter prometheus.Gauge
 )
 
-func StartMonitoring(showZeroRequest bool) {
-	ticker := time.NewTicker(50 * time.Millisecond)
+func StartMonitoring(showZeroRequest bool, metricsPort string) {
+	requestsCounter = prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "test_requests_counter",
+		Help: "requests counter",
+	})
+	prometheus.MustRegister(requestsCounter)
+
 	go func() {
-		for {
-			select {
-			case <-ticker.C:
-				count := monitoringInstance.count
-				goRoutineNum := runtime.NumGoroutine()
-				if showZeroRequest || count != 0 {
-					logrus.Println("Ongoing requests: ", count)
-					logrus.Println("Number of go routines: ", goRoutineNum)
-					logrus.Println()
-				}
-			}
-		}
+		http.Handle("/metrics", promhttp.Handler())
+		http.ListenAndServe(metricsPort, nil)
 	}()
 }
 
 func IncrementCounter() {
-	monitoringInstance.Lock()
-	defer monitoringInstance.Unlock()
-	monitoringInstance.count++
+	requestsCounter.Inc()
 }
 
 func DecrementCounter() {
-	monitoringInstance.Lock()
-	defer monitoringInstance.Unlock()
-	monitoringInstance.count--
+	requestsCounter.Dec()
 }

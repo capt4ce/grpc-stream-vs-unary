@@ -13,7 +13,7 @@ func main() {
 		serverType = os.Args[1]
 	}
 
-	monitoring.StartMonitoring(false)
+	monitoring.StartMonitoring(false, ":9000")
 
 	if serverType == "stream" {
 		serverType = "stream"
