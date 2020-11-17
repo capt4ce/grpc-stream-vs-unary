@@ -16,6 +16,7 @@ message UnaryReply {
 
 service StreamService{
     rpc SendStreamRequest(stream StreamRequest) returns (stream StreamReply){};
+    rpc SendMessageTrial(stream StreamRequest) returns (stream StreamReply){};
 }
 
 message StreamRequest{

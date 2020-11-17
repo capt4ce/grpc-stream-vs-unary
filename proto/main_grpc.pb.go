@@ -101,6 +101,7 @@ var _MainService_serviceDesc = grpc.ServiceDesc{
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type StreamServiceClient interface {
 	SendStreamRequest(ctx context.Context, opts ...grpc.CallOption) (StreamService_SendStreamRequestClient, error)
+	SendMessageTrial(ctx context.Context, opts ...grpc.CallOption) (StreamService_SendMessageTrialClient, error)
 }
 
 type streamServiceClient struct {
@@ -142,11 +143,43 @@ func (x *streamServiceSendStreamRequestClient) Recv() (*StreamReply, error) {
 	return m, nil
 }
 
+func (c *streamServiceClient) SendMessageTrial(ctx context.Context, opts ...grpc.CallOption) (StreamService_SendMessageTrialClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_StreamService_serviceDesc.Streams[1], "/proto.StreamService/SendMessageTrial", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &streamServiceSendMessageTrialClient{stream}
+	return x, nil
+}
+
+type StreamService_SendMessageTrialClient interface {
+	Send(*StreamRequest) error
+	Recv() (*StreamReply, error)
+	grpc.ClientStream
+}
+
+type streamServiceSendMessageTrialClient struct {
+	grpc.ClientStream
+}
+
+func (x *streamServiceSendMessageTrialClient) Send(m *StreamRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *streamServiceSendMessageTrialClient) Recv() (*StreamReply, error) {
+	m := new(StreamReply)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // StreamServiceServer is the server API for StreamService service.
 // All implementations must embed UnimplementedStreamServiceServer
 // for forward compatibility
 type StreamServiceServer interface {
 	SendStreamRequest(StreamService_SendStreamRequestServer) error
+	SendMessageTrial(StreamService_SendMessageTrialServer) error
 	mustEmbedUnimplementedStreamServiceServer()
 }
 
@@ -156,6 +189,9 @@ type UnimplementedStreamServiceServer struct {
 
 func (UnimplementedStreamServiceServer) SendStreamRequest(StreamService_SendStreamRequestServer) error {
 	return status.Errorf(codes.Unimplemented, "method SendStreamRequest not implemented")
+}
+func (UnimplementedStreamServiceServer) SendMessageTrial(StreamService_SendMessageTrialServer) error {
+	return status.Errorf(codes.Unimplemented, "method SendMessageTrial not implemented")
 }
 func (UnimplementedStreamServiceServer) mustEmbedUnimplementedStreamServiceServer() {}
 
@@ -196,6 +232,32 @@ func (x *streamServiceSendStreamRequestServer) Recv() (*StreamRequest, error) {
 	return m, nil
 }
 
+func _StreamService_SendMessageTrial_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(StreamServiceServer).SendMessageTrial(&streamServiceSendMessageTrialServer{stream})
+}
+
+type StreamService_SendMessageTrialServer interface {
+	Send(*StreamReply) error
+	Recv() (*StreamRequest, error)
+	grpc.ServerStream
+}
+
+type streamServiceSendMessageTrialServer struct {
+	grpc.ServerStream
+}
+
+func (x *streamServiceSendMessageTrialServer) Send(m *StreamReply) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *streamServiceSendMessageTrialServer) Recv() (*StreamRequest, error) {
+	m := new(StreamRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 var _StreamService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "proto.StreamService",
 	HandlerType: (*StreamServiceServer)(nil),
@@ -204,6 +266,12 @@ var _StreamService_serviceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "SendStreamRequest",
 			Handler:       _StreamService_SendStreamRequest_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "SendMessageTrial",
+			Handler:       _StreamService_SendMessageTrial_Handler,
 			ServerStreams: true,
 			ClientStreams: true,
 		},

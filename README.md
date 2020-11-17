@@ -30,3 +30,11 @@ To run this project, you need to run the server and client code in separate term
   3. Observe that there are much less hanging requests and go routines compared to when we use grpc unary connections.
 
      ![Stream connections result](./assets/stream.png)
+
+## UPDATE
+
+when performing stream for multiple services, I noticed there has been significant jump in the requests hanging and go routines running. I assume this is due to the re-creation of stream (that has to be done to the fact that a stream corresponds to a service, not a connection)
+
+![Re-creation on stream with stream.CloseSend()](./assets/stream-bad.png)
+
+![Re-creation on stream without stream.CloseSend()](./assets/stream-bad.png)

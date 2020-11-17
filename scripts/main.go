@@ -32,7 +32,7 @@ func main() {
 		for {
 			select {
 			case <-ticker.C:
-				for i := 0; i < 1000; i++ {
+				for i := 0; i < 10000; i++ {
 					go func() {
 						monitoring.IncrementCounter()
 						defer monitoring.DecrementCounter()

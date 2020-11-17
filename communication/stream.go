@@ -19,14 +19,13 @@ import (
 
 type Stream struct {
 	Address string
-	Stream  pb.StreamService_SendStreamRequestClient
+	Client  pb.StreamServiceClient
 }
 type StreamServer struct {
 	pb.UnimplementedStreamServiceServer
 }
 
 func CreateStreamClient(address string) CommunicationInterface {
-	ctx := context.Background()
 
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
@@ -37,29 +36,11 @@ func CreateStreamClient(address string) CommunicationInterface {
 	if err != nil {
 		logrus.Println("error in contacting server: ", err)
 	}
-	stream, err := client.SendStreamRequest(ctx)
-	if err != nil {
-		logrus.Println("error in stream", err)
-	}
 
 	instance := &Stream{
 		Address: address,
-		Stream:  stream,
+		Client:  client,
 	}
-
-	go func() {
-		for {
-			_, err := stream.Recv()
-			if err == io.EOF {
-				// close(done)
-				continue
-			}
-			if err != nil {
-				logrus.Fatalf("can not receive %v", err)
-			}
-			// logrus.Printf("========> new res %d received", resp.Res)
-		}
-	}()
 
 	return *instance
 }
@@ -82,7 +63,28 @@ func StartStreamServerInstance(port string) {
 }
 
 func (s Stream) SendRequest() {
-	err := s.Stream.Send(&pb.StreamRequest{Req: int64(rand.Intn(10))})
+	ctx := context.Background()
+	stream, err := s.Client.SendStreamRequest(ctx)
+	if err != nil {
+		logrus.Println("error in stream", err)
+	}
+
+	go func() {
+		for {
+			_, err := stream.Recv()
+			if err == io.EOF {
+				stream.CloseSend()
+				logrus.Println("connnection closed")
+				break
+			}
+			if err != nil {
+				logrus.Fatalf("can not receive %v", err)
+			}
+			// logrus.Printf("========> new res %d received", resp.Res)
+		}
+	}()
+
+	err = stream.Send(&pb.StreamRequest{Req: int64(rand.Intn(10))})
 	if err != nil && err != io.EOF {
 		logrus.Println("error sending stream data", err)
 	}
@@ -127,7 +129,7 @@ func (ss *StreamServer) SendMessageTrial(stream pb.StreamService_SendMessageTria
 		// logrus.Println("request ", req.GetReq())
 		go func() {
 			defer monitoring.DecrementCounter()
-			time.Sleep(30 * time.Millisecond)
+			time.Sleep(40 * time.Millisecond)
 			err = stream.Send(&pb.StreamReply{Res: req.GetReq()})
 			if err != nil {
 				logrus.Println(err)

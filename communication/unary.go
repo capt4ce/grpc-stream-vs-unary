@@ -68,6 +68,6 @@ func (us *UnaryServer) SendUnaryRequest(ctx context.Context, in *pb.UnaryRequest
 
 	// logrus.Println("request", in.GetReq())
 
-	time.Sleep(30 * time.Millisecond)
+	time.Sleep(40 * time.Millisecond)
 	return &pb.UnaryReply{Res: 123}, nil
 }
