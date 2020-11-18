@@ -53,8 +53,7 @@ func CreateUnaryClient(address string) CommunicationInterface {
 
 func (u Unary) SendRequest() {
 	// Contact the server and print out its response.
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	ctx := context.Background()
 	_, err := u.Client.SendUnaryRequest(ctx, &pb.UnaryRequest{Req: 1})
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
