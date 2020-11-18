@@ -21,7 +21,7 @@ To run this project, you need to run the server and client code in separate term
   2. open new terminal window and run `go run ./scripts/main.go`
   3. Observe that there are a lot of hanging requests and also go routines.
 
-     ![Unary connections result](./assets/unary.png)
+     ![Unary performance result](./assets/unary-server-client-performance.png)
 
 - Stream Connection
 
@@ -29,4 +29,4 @@ To run this project, you need to run the server and client code in separate term
   2. open new terminal window and run `go run ./scripts/main.go stream`
   3. Observe that there are much less hanging requests and go routines compared to when we use grpc unary connections.
 
-     ![Stream connections result](./assets/stream.png)
+     ![Stream connections result](./assets/stream-server-client-performance.png)

@@ -69,23 +69,29 @@ func main() {
 	// measuring longest request took
 	var wg sync.WaitGroup
 	var maxElapsed time.Duration
+
 	for i := 0; i < 10000; i++ {
 		wg.Add(1)
 		go func() {
 			start := time.Now()
 			monitoring.IncrementCounter()
 			defer func() {
-				defer monitoring.DecrementCounter()
-				defer wg.Done()
 				elapsed := time.Since(start)
 				if elapsed > maxElapsed {
 					maxElapsed = elapsed
 				}
+				monitoring.DecrementCounter()
+				wg.Done()
 			}()
 			comm.SendRequest()
 		}()
-		logrus.Println(i)
+		// logrus.Println(i)
 	}
 	wg.Wait()
+
+	time.Sleep(5 * time.Second)
+
 	logrus.Printf("Longest Request(s) took %s", maxElapsed)
+	logrus.Printf("Highest requests piled up %d", monitoring.GetMaxCount())
+	logrus.Printf("Highest goroutines piled up %d", monitoring.GetMaxGoroutine())
 }
